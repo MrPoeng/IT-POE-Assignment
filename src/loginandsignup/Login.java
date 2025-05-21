@@ -1,11 +1,16 @@
 
 package loginandsignup;
 
-import java.io.BufferedReader;
-
-import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.JOptionPane;
-
+import java.awt.HeadlessException;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import java.awt.Window
 
 public class Login extends javax.swing.JFrame {
 
@@ -38,14 +43,15 @@ public class Login extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(800, 500));
+        setPreferredSize(new java.awt.Dimension(400, 520));
 
-        jPanel1.setPreferredSize(new java.awt.Dimension(400, 500));
+        jPanel1.setPreferredSize(new java.awt.Dimension(400, 520));
         jPanel1.setLayout(null);
 
         jPanel2.setBackground(new java.awt.Color(0, 102, 102));
         jPanel2.setForeground(new java.awt.Color(0, 102, 255));
         jPanel2.setMinimumSize(new java.awt.Dimension(400, 330));
+        jPanel2.setPreferredSize(new java.awt.Dimension(500, 520));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(153, 153, 153));
@@ -123,9 +129,9 @@ public class Login extends javax.swing.JFrame {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(27, 27, 27)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(27, 27, 27)
                 .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(42, 42, 42)
+                .addGap(33, 33, 33)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -138,23 +144,22 @@ public class Login extends javax.swing.JFrame {
                 .addContainerGap(48, Short.MAX_VALUE))
         );
 
-        jPanel1.add(jPanel2);
-        jPanel2.setBounds(0, 0, 400, 510);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 800, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 506, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 6, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 506, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 510, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 62, Short.MAX_VALUE))
         );
 
         jPanel1.getAccessibleContext().setAccessibleName("LOGIN");
@@ -164,7 +169,8 @@ public class Login extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 
-        SignUp SignUpFrame = new SignUp();
+        SignUp SignUpFrame;
+        SignUpFrame = new SignUp();
         SignUpFrame.setVisible(true);
         SignUpFrame.pack();
         SignUpFrame.setLocationRelativeTo(null);
@@ -174,39 +180,76 @@ public class Login extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-       String username = txtName.getText();
-    String password = txtPassword.getText();
-    boolean loginSuccessful = false;
+        String username = txtName.getText();
+        String password = txtPassword.getText();
+        String passDb = null;
+        String query;        
+        String SUrl, SUser, Spass;
+        SUrl = "jdbc:MySql://localhost:3306/logindb";
+        SUser = "root";
+        Spass = "Incorrect@01";
+        int notFound = 0;
 
-    try (FileReader fr = new FileReader("txtlogin.txt");
-         BufferedReader reader = new BufferedReader(fr)) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-            String[] credentials = line.split(",");
-            if (credentials.length == 2) {
-                String un = credentials[0].trim();
-                String pw = credentials[1].trim();
-                if (username.equals(un) && password.equals(pw)) {
-                    loginSuccessful = true;
-                    break;
-                }
-            }
-        }
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(null, "Error reading login file: " + e.getMessage());
-    }
-
-    if (loginSuccessful) {
-        SignUp su = new SignUp();
-        su.setVisible(true);
-        su.pack();
-        su.setLocationRelativeTo(null);
-        this.dispose();
+     try { 
+     Class.forName("com.mysql.cj.jdbc.Driver");
+     Connection con = DriverManager.getConnection(SUrl, SUser, Spass);
+    
+     if (username.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Full Name is Required", "Error", JOptionPane.ERROR_MESSAGE);
+    } else if (password.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Password is Required", "Error", JOptionPane.ERROR_MESSAGE);
     } else {
-        JOptionPane.showMessageDialog(null, "Invalid login details");
+        // ✅ Updated query to reference the correct table
+        query = "SELECT password FROM login WHERE name = ?";
+        PreparedStatement pst = con.prepareStatement(query);
+        pst.setString(1, username);
+        ResultSet rs = pst.executeQuery();  // ✅ Correct
+        
+        if (rs.next()) {
+            passDb = rs.getString("password");
+            notFound = 1;
+        }
+
+        if (notFound == 1 && password.equals(passDb)) {
+            JOptionPane.showMessageDialog(null, "Sign in successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Welcome To QuickChat"+ "");
+            
+            Entry_page entryPanel = new Entry_page();
+            JFrame frame = new JFrame("Entry Page");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setContentPane(entryPanel);  // Set the JPanel as the main content
+            frame.pack();                      // Resize to fit the panel
+            frame.setLocationRelativeTo(null); // Center the frame
+            frame.setVisible(true);            // Show the frame
+
+              
+              // ✅ Close the login window
+             Window loginWindow = SwingUtilities.getWindowAncestor(txtName);
+             if (loginWindow != null) {
+             loginWindow.dispose();
+             }
+              
+              
+            
+           
+        } else {
+            JOptionPane.showMessageDialog(null, "Incorrect username or password", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        
+        // Clear input fields after processing
+        txtName.setText("");
+        txtPassword.setText("");
+        
+        
+      
+       
+        con.close();
+
     }
-
-
+    } catch (HeadlessException | ClassNotFoundException | SQLException e) {
+        System.out.println("Error!! " + e.getMessage());
+}
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void txtNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameActionPerformed
@@ -241,10 +284,8 @@ public class Login extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Login().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new Login().setVisible(true);
         });
     }
 
@@ -262,7 +303,5 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JTextArea txtPassword;
     // End of variables declaration//GEN-END:variables
 
-    private void While(boolean hasNext) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+   
 }
