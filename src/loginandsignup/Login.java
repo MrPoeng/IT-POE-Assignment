@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 import java.awt.HeadlessException;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import java.awt.Window
+import java.awt.Window;
 
 public class Login extends javax.swing.JFrame {
 
