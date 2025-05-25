@@ -1,9 +1,11 @@
 
 package loginandsignup;
 
+import java.awt.Window;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JButton;
-import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
 
 
 public class Entry_page extends javax.swing.JPanel {
@@ -123,15 +125,29 @@ public class Entry_page extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(null, "Please enter a positive number.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(null, "You chose to send " + messageCount + " messages.");
-                // You can loop through and simulate sending messages here
-            }
+                
 
+               // ✅ Launch Chat_Server (JFrame)
+                Chat_page chatPanel = new Chat_page();
+                JFrame frame = new JFrame("Chat Page");
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setContentPane(chatPanel);  // ✅ Use chatPanel, not entryPanel
+                frame.pack();                      // Resize to fit the preferred size of chatPanel
+                frame.setLocationRelativeTo(null); // Center the window on screen
+                frame.setVisible(true);            // Display the window
+
+
+
+                // ✅ Close Entry_page window
+                Window thisWindow = SwingUtilities.getWindowAncestor(this);
+                if (thisWindow != null) {
+                    thisWindow.dispose();
+                }
+            }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Invalid number. Please enter a valid integer.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
