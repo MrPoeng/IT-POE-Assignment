@@ -233,10 +233,14 @@ public class SignUp extends javax.swing.JFrame {
 
     private void jToggleButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton2ActionPerformed
         // TODO add your handling code here:
-         Login LoginFrame = new Login();
+        Login LoginFrame = new Login();
         LoginFrame.setVisible(true);
         LoginFrame.pack();
         LoginFrame.setLocationRelativeTo(null);
+        
+         this.dispose();
+        
+        
     }//GEN-LAST:event_jToggleButton2ActionPerformed
 
     /**

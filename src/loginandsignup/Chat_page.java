@@ -1,21 +1,95 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
- */
+
 package loginandsignup;
 
-/**
- *
- * @author andre
- */
+import javax.swing.*;
+import javax.swing.text.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.List;
+import java.util.ArrayList;
+
+import java.io.*;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 public class Chat_page extends javax.swing.JPanel {
 
-    /**
-     * Creates new form Chat_page
-     */
-    public Chat_page() {
-        initComponents();
+    private List<JSONObject> sentMessages = new ArrayList<>();
+    private List<MessageRecord> messageLog = new ArrayList<>();
+    private int messageLimit;
+    private int messagesSent = 0;
+
+    private static class MessageRecord {
+        String messageID;
+        String messageHash;
+        String recipient;
+        String message;
+
+        MessageRecord(String messageID, String messageHash, String recipient, String message) {
+            this.messageID = messageID;
+            this.messageHash = messageHash;
+            this.recipient = recipient;
+            this.message = message;
+        }
     }
+
+    public Chat_page(int messageLimit) {
+        this.messageLimit = messageLimit;
+        initComponents();
+        jTextArea1.setEditable(false);
+        applyCharacterLimit(jTextField1, 250);
+    }
+
+    private void saveMessagesToJSON() {
+        JSONArray existingMessages = new JSONArray();
+        File file = new File("sentMessages.json");
+
+        if (file.exists()) {
+            try (FileReader reader = new FileReader(file)) {
+                existingMessages = (JSONArray) new JSONParser().parse(reader);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error reading existing messages: " + e.getMessage());
+            }
+        }
+
+        existingMessages.addAll(sentMessages);
+
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(existingMessages.toJSONString());
+            writer.flush();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error writing to JSON file: " + e.getMessage());
+        }
+    }
+
+    private void applyCharacterLimit(javax.swing.JTextField textField, int maxChars) {
+        PlainDocument doc = new PlainDocument();
+        doc.setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                if (string == null) return;
+                if ((fb.getDocument().getLength() + string.length()) <= maxChars) {
+                    super.insertString(fb, offset, string, attr);
+                } else {
+                    Toolkit.getDefaultToolkit().beep();
+                }
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                if (text == null) return;
+                if ((fb.getDocument().getLength() - length + text.length()) <= maxChars) {
+                    super.replace(fb, offset, length, text, attrs);
+                } else {
+                    Toolkit.getDefaultToolkit().beep();
+                }
+            }
+        });
+        textField.setDocument(doc);
+    }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -33,44 +107,64 @@ public class Chat_page extends javax.swing.JPanel {
         jTextField2 = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
 
         jButton1.setText("Send");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("Enter recicients number");
 
         jLabel2.setText("Type message below");
 
+        jLabel3.setText("Chat Page");
+
+        jButton2.setText("Exit");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jTextField1)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
-                                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jButton1)))))
-                .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel2)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
+                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton2)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(20, 20, 20)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(jButton2))
+                .addGap(4, 4, 4)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
@@ -85,11 +179,80 @@ public class Chat_page extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        String recipient = jTextField2.getText().trim();
+        String message = jTextField1.getText().trim();
+
+        if (recipient.isEmpty() || message.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Recipient and message cannot be empty.");
+            return;
+        }
+
+        if (messagesSent >= messageLimit) {
+            JOptionPane.showMessageDialog(this, "You have reached the maximum number of messages allowed (" + messageLimit + ").");
+            jButton1.setEnabled(false);
+            return;
+        }
+
+        // Generate ID and hash
+        String messageId = String.valueOf(1000000000L + (long) (Math.random() * 9000000000L));
+        String[] words = message.split("\\s+");
+        String firstWord = words.length > 0 ? words[0] : "";
+        String lastWord = words.length > 1 ? words[words.length - 1] : firstWord;
+        String hash = (messageId.substring(0, 2) + ":" + firstWord + "_" + lastWord).toUpperCase();
+
+        // Append to chat view
+        jTextArea1.append("To [" + recipient + "]: " + message + "\n");
+
+        // Create JSON object
+        JSONObject msgObj = new JSONObject();
+        msgObj.put("messageID", messageId);
+        msgObj.put("messageHash", hash);
+        msgObj.put("recipient", recipient);
+        msgObj.put("message", message);
+        String timestamp = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date());
+        msgObj.put("timestamp", timestamp);
+
+        // Store
+        sentMessages.add(msgObj);
+        messageLog.add(new MessageRecord(messageId, hash, recipient, message));
+        messagesSent++;
+        jTextField1.setText("");
+
+        // Limit reached
+        if (messagesSent >= messageLimit) {
+            jButton1.setEnabled(false);
+            JOptionPane.showMessageDialog(this, "Message limit reached.");
+
+            StringBuilder summary = new StringBuilder("Message Limit Reached.\n\n");
+            for (MessageRecord record : messageLog) {
+                summary.append("Message ID: ").append(record.messageID).append("\n");
+                summary.append("Message Hash: ").append(record.messageHash).append("\n");
+                summary.append("Recipient: ").append(record.recipient).append("\n");
+                summary.append("Message: ").append(record.message).append("\n");
+                summary.append("------------------------------------\n");
+            }
+
+            JOptionPane.showMessageDialog(this, summary.toString(), "Message Summary", JOptionPane.INFORMATION_MESSAGE);
+
+            // Save messages to JSON
+            saveMessagesToJSON();
+   
+}
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton2ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;

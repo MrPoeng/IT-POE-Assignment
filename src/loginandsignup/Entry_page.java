@@ -128,7 +128,7 @@ public class Entry_page extends javax.swing.JPanel {
                 
 
                // ✅ Launch Chat_Server (JFrame)
-                Chat_page chatPanel = new Chat_page();
+                Chat_page chatPanel = new Chat_page(messageCount);
                 JFrame frame = new JFrame("Chat Page");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setContentPane(chatPanel);  // ✅ Use chatPanel, not entryPanel

@@ -212,7 +212,8 @@ public class Login extends javax.swing.JFrame {
 
         if (notFound == 1 && password.equals(passDb)) {
             JOptionPane.showMessageDialog(null, "Sign in successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            JOptionPane.showMessageDialog(null, "Welcome To QuickChat"+ "");
+            JOptionPane.showMessageDialog(null, "Welcome To QuickChat\n" + username);
+
             
             Entry_page entryPanel = new Entry_page();
             JFrame frame = new JFrame("Entry Page");
